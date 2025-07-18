@@ -1,1 +1,438 @@
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결하다 주관적 선호 설문</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .question-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .result-bar {
+            transition: width 1s ease-in-out;
+        }
+        .gender-specific-q {
+            border-left: 4px solid #6366f1;
+            background-color: #eef2ff;
+        }
+        /* Custom styles for range input */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            margin: 7.3px 0;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 11.4px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7.3px;
+        }
+        input[type=range]:focus::-webkit-slider-runnable-track {
+            background: #d1d5db;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 11.4px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <!-- Header -->
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-indigo-600">결하다</h1>
+            <p class="text-lg md:text-xl text-gray-600 mt-2">주관적 선호 설문 (v4: 성별 특화 질문)</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Male Form -->
+            <div class="bg-blue-50 p-6 rounded-2xl shadow-md border border-blue-200">
+                <h2 class="text-2xl font-bold text-center mb-6 text-blue-800">👨‍🦱 남성</h2>
+                <form id="male-form" class="space-y-8">
+                    <!-- Questions will be dynamically inserted here -->
+                </form>
+            </div>
+
+            <!-- Female Form -->
+            <div class="bg-pink-50 p-6 rounded-2xl shadow-md border border-pink-200">
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-800">👩‍🦰 여성</h2>
+                <form id="female-form" class="space-y-8">
+                    <!-- Questions will be dynamically inserted here -->
+                </form>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="text-center mt-8 md:mt-12">
+            <button id="view-result-btn" class="bg-indigo-600 text-white font-bold py-4 px-8 rounded-full text-xl hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105">
+                궁합 결과 보기
+            </button>
+        </div>
+
+        <!-- Result Modal -->
+        <div id="result-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center p-4 z-50">
+            <div id="result-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative transform scale-95 transition-transform duration-300">
+                <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-indigo-600">관계 궁합 리포트</h2>
+                </div>
+
+                <!-- Overall Score -->
+                <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-6 text-center mb-8">
+                    <p class="text-lg text-indigo-800 mb-2">두 분의 종합 궁합 지수는?</p>
+                    <p id="overall-score" class="text-7xl font-extrabold text-indigo-600">0점</p>
+                    <p id="overall-comment" class="mt-3 text-base text-indigo-700 font-medium"></p>
+                    <p class="text-xs text-gray-500 mt-2">* 종합 궁합은 공통 질문을 바탕으로 계산됩니다.</p>
+                </div>
+
+                <!-- Detailed Scores -->
+                <div class="space-y-6" id="detailed-results-container">
+                    <!-- Detailed results will be inserted here -->
+                </div>
+
+                <!-- Ice Breaking Questions -->
+                 <div class="mt-10 pt-6 border-t-2 border-gray-200">
+                    <h3 class="text-2xl font-bold text-center text-gray-800 mb-6">대화를 시작해보세요! 💬</h3>
+                    <div id="ice-breaking-questions" class="space-y-5">
+                        <!-- Ice breakers will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // Part 1: 가치관
+            { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q1", text: "1억 원의 보너스가 생겼습니다. 당신의 선택은?", type: "select", options: [{ value: "a", text: "즉시 평소 꿈꾸던 차를 계약한다 (현재의 만족)" }, { value: "b", text: "안정적인 우량주에 장기 투자한다 (미래의 안정)" }, { value: "c", text: "부모님께 절반을 드리고 나머지는 저축한다 (가족과 관계)" }, { value: "d", text: "MBA 진학 등 커리어 발전을 위해 사용한다 (성장과 성취)" }] },
+            { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q13", text: "결혼 후 재산 관리 방식에 대한 당신의 생각은?", type: "select", options: [{ value: "a", text: "각자 수입은 각자 관리, 생활비만 공동 부담 (독립성)" }, { value: "b", text: "모든 수입을 합쳐 공동 통장으로 관리 (투명성과 공동체)" }, { value: "c", text: "수입이 더 높은 쪽이 주도적으로 관리 (효율성)" }] },
+            { gender: 'male', part: "Part 1: 삶의 나침반 (가치관)", id: "q_m1", text: "연인이 당신의 소득이나 직업 안정성에 대해 불안감을 내비친다면, 당신의 반응은?", type: "select", options: [{ value: "a", text: "불안함을 공감하며, 함께 미래 계획을 세운다" }, { value: "b", text: "내 능력을 믿어주지 않는 것 같아 서운하다" }, { value: "c", text: "더 안정적인 직장을 알아봐야 하나 고민한다" }] },
+            { gender: 'female', part: "Part 1: 삶의 나침반 (가치관)", id: "q_f1", text: "결혼이나 출산으로 인해 커리어가 중단될 수 있는 가능성에 대해 어떻게 생각하시나요?", type: "select", options: [{ value: "a", text: "커리어보다 가정이 중요하므로, 감수할 수 있다" }, { value: "b", text: "경력 단절은 안된다. 파트너와 함께 해결책을 찾을 것이다" }, { value: "c", text: "커리어를 위해 결혼/출산을 미루거나 포기할 수 있다" }] },
+            { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q2", text: "당신이 생각하는 '가장 이상적인 노년의 모습'은?", type: "select", options: [{ value: "a", text: "사회적으로 존경받으며 전문성을 발휘하는 삶" }, { value: "b", text: "손주들에게 둘러싸여 화목한 가정을 꾸리는 삶" }, { value: "c", text: "배우자와 세계 일주를 하며 새로운 것을 배우는 삶" }, { value: "d", text: "조용한 시골에서 텃밭을 가꾸며 평온하게 사는 삶" }] },
+
+            // Part 2: 성격/기질
+            { gender: 'both', part: "Part 2: 타고난 다름 (성격/기질)", id: "q4", text: "끔찍하게 힘든 하루를 보냈습니다. 집에 돌아온 당신의 첫 행동은?", type: "select", options: [{ value: "a", text: "가장 친한 친구에게 전화해 오늘 일을 전부 털어놓는다 (외향/표출형)" }, { value: "b", text: "아무도 없는 방에서 좋아하는 영화를 보며 혼자만의 시간을 갖는다 (내향/충전형)" }, { value: "c", text: "땀 흘려 운동하거나, 몰두할 수 있는 취미 활동을 한다 (활동/전환형)" }, { value: "d", text: "따뜻한 물로 샤워하고, 좋아하는 음식을 시켜 먹는다 (감각/보상형)" }] },
+            { gender: 'both', part: "Part 2: 타고난 다름 (성격/기질)", id: "q5", text: "연인과 갈등이 생겼을 때, 당신의 일반적인 반응은?", type: "select", options: [{ value: "a", text: "감정이 격해지더라도 그 자리에서 바로 대화로 풀어야 한다 (즉시 해결형)" }, { value: "b", text: "일단 각자 생각할 시간을 갖고, 감정이 가라앉으면 대화한다 (숙고 후 해결형)" }, { value: "c", "text": "상대방의 기분이 풀릴 때까지 일단 맞춰주고, 나중에 다시 이야기한다 (화합 우선형)" }, { value: "d", text: "문제를 직접적으로 언급하기보다, 시간이 해결해주길 기다린다 (회피형)" }] },
+            { gender: 'both', part: "Part 2: 타고난 다름 (성격/기질)", id: "q15", text: "연인이 주말에 '아무 계획 없이 그냥 떠나자!'라고 제안합니다. 당신의 속마음은?", type: "range", min: 1, max: 5, default: 3, labels: ["(불안) 숙소는? 예산은?", "(설렘) 너무 신나!"] },
+            
+            // Part 3: 라이프스타일
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q7", text: "아무 약속 없는 이상적인 토요일 하루는?", type: "select", options: [{ value: "a", text: "늦잠 후 배달 음식과 함께 넷플릭스 정주행 (완전한 휴식)" }, { value: "b", text: "아침 일찍 일어나 등산이나 서핑 즐기기 (아웃도어 액티비티)" }, { value: "c", text: "미술관이나 독립 서점에 들러 영감 채우기 (문화/예술)" }, { value: "d", text: "평소 가고 싶던 맛집, 핫플레이스 카페 투어 (트렌드/미식)" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q17", text: "일주일간의 휴가, 당신이 선택할 여행지는?", type: "select", options: [{ value: "a", text: "몰디브의 고급 리조트에서 즐기는 프라이빗 휴양 (럭셔리/힐링)" }, { value: "b", text: "페루 마추픽추 트레킹과 현지 문화 체험 (모험/도전)" }, { value: "c", text: "파리 루브르 박물관과 미슐랭 레스토랑 투어 (도시/문화)" }, { value: "d", text: "제주도에서 차를 렌트해 발길 닿는 대로 여행 (자유/즉흥)" }] },
+            { gender: 'male', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_m2", text: "개인적인 취미(게임, 낚시, 동호회 등)에 주말 시간을 온전히 사용하는 것에 대해 연인이 서운해한다면?", type: "select", options: [{ value: "a", text: "연인과의 시간이 더 중요하므로, 취미를 줄인다" }, { value: "b", text: "서운함을 풀어주고, 취미의 중요성을 설명하며 타협점을 찾는다" }, { value: "c", text: "개인의 시간은 존중받아야 한다고 주장한다" }] },
+            { gender: 'female', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_f2", text: "맞벌이를 할 경우, 가사 분담의 가장 이상적인 모습은?", type: "select", options: [{ value: "a", text: "시간 여유가 있는 사람이 더 많이 한다" }, { value: "b", text: "각자 잘하는 일을 분담해서 처리한다" }, { value: "c", text: "5:5로 공평하게, 또는 규칙을 정해서 분담한다" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q8", text: "피곤하게 퇴근했는데, 설거짓거리가 쌓여있습니다. 당신은?", type: "range", min: 1, max: 5, default: 3, labels: ["내일로 미룬다", "피곤해도 바로 치운다"] },
+
+            // Part 4: 관계의 기술
+            { gender: 'both', part: "Part 4: 관계의 기술 (소통/관계)", id: "q10", text: "연인에게 '사랑받고 있다'고 가장 크게 느끼는 순간은?", type: "select", options: [{ value: "a", text: "사람들 앞에서 나를 자랑스럽게 칭찬해줄 때 (인정하는 말)" }, { value: "b", text: "힘들 때 말없이 꽉 안아줄 때 (스킨십)" }, { value: "c", text: "나와의 약속을 최우선으로 생각하고 시간을 내어줄 때 (함께하는 시간)" }, { value: "d", text: "내가 힘든 일을 묵묵히 대신 처리해줄 때 (봉사)" }, { value: "e", text: "내 취향을 기억하고 깜짝 선물을 해줄 때 (선물)" }] },
+            { gender: 'both', part: "Part 4: 관계의 기술 (소통/관계)", id: "q11", text: "바쁜 평일 근무 시간, 연인과의 이상적인 연락 방식은?", type: "select", options: [{ value: "a", text: "틈날 때마다 일상 공유 (수시로)" }, { value: "b", text: "점심시간, 퇴근 후 등 정해진 시간에 통화 (규칙적)" }, { value: "c", text: "급한 용건이 있을 때만 연락 (필요시)" }] },
+            { gender: 'male', part: "Part 4: 관계의 기술 (소통/관계)", id: "q_m3", text: "힘든 일이 있을 때, 연인에게 어느 정도까지 솔직하게 털어놓나요?", type: "select", options: [{ value: "a", text: "사소한 것까지 모두 공유하며 위로받고 싶다" }, { value: "b", text: "걱정시킬까 봐, 심각한 문제는 혼자 해결하려 한다" }, { value: "c", text: "대부분 혼자 해결하지만, 정말 힘들 땐 기댄다" }] },
+            { gender: 'female', part: "Part 4: 관계의 기술 (소통/관계)", id: "q_f3", text: "연인에게 '보호받고 있다'고 느끼게 하는 가장 중요한 행동은 무엇인가요?", type: "select", options: [{ value: "a", text: "밤늦게 귀가할 때 데리러 와주는 등 물리적인 보호" }, { value: "b", text: "다른 사람 앞에서 내 편을 들어주는 등 사회적인 보호" }, { value: "c", text: "내 감정을 세심하게 살피고 공감해주는 정서적인 보호" }] },
+            { gender: 'both', part: "Part 4: 관계의 기술 (소통/관계)", id: "q19", text: "연인이 당신에게 말하지 않고, 친한 이성 친구와 단둘이 저녁 식사를 한 사실을 알게 되었습니다. 당신의 감정은?", type: "range", min: 1, max: 5, default: 3, labels: ["(쿨함) 그럴 수 있지", "(화남) 어떻게 말도 안 해?"] },
+        ];
+
+        const partInfo = {
+            "Part 1: 삶의 나침반 (가치관)": { title: "가치관 궁합", icon: "🧭", color: "green" },
+            "Part 2: 타고난 다름 (성격/기질)": { title: "성격 궁합", icon: "🎭", color: "purple" },
+            "Part 3: 일상의 합 (라이프스타일)": { title: "라이프스타일 궁합", icon: "🏡", color: "yellow" },
+            "Part 4: 관계의 기술 (소통/관계)": { title: "소통 방식 궁합", icon: "❤️", color: "red" }
+        };
+
+        // --- UI Rendering Functions ---
+        function renderQuestions() {
+            const maleForm = document.getElementById('male-form');
+            const femaleForm = document.getElementById('female-form');
+            maleForm.innerHTML = '';
+            femaleForm.innerHTML = '';
+            let currentPartMale = "";
+            let currentPartFemale = "";
+
+            questions.forEach(q => {
+                if (q.gender === 'both' || q.gender === 'male') {
+                    if (q.part !== currentPartMale) {
+                        currentPartMale = q.part;
+                        maleForm.innerHTML += `<h3 class="text-xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4">${partInfo[currentPartMale].icon} ${currentPartMale}</h3>`;
+                    }
+                    maleForm.innerHTML += createQuestionHTML(q, 'male');
+                }
+                
+                if (q.gender === 'both' || q.gender === 'female') {
+                     if (q.part !== currentPartFemale) {
+                        currentPartFemale = q.part;
+                        femaleForm.innerHTML += `<h3 class="text-xl font-semibold text-pink-700 border-b-2 border-pink-200 pb-2 mb-4">${partInfo[currentPartFemale].icon} ${currentPartFemale}</h3>`;
+                    }
+                    femaleForm.innerHTML += createQuestionHTML(q, 'female');
+                }
+            });
+
+            document.querySelectorAll('input[type="range"]').forEach(range => {
+                const valueSpan = document.getElementById(`${range.id}-value`);
+                if(valueSpan) valueSpan.textContent = range.value;
+                range.addEventListener('input', (event) => {
+                    const targetValueSpan = document.getElementById(`${event.target.id}-value`);
+                    if(targetValueSpan) targetValueSpan.textContent = event.target.value;
+                });
+            });
+        }
+        
+        function createQuestionHTML(q, gender) {
+            const isSpecific = q.gender !== 'both';
+            const specificClass = isSpecific ? 'gender-specific-q' : '';
+            const specificTag = isSpecific ? `<span class="text-xs font-bold text-white bg-indigo-500 px-2 py-1 rounded-full ml-2">특화 질문</span>` : '';
+
+            return `
+                <div class="question-card bg-white p-4 rounded-lg shadow ${specificClass}">
+                    <label for="${q.id}-${gender}" class="block text-base font-medium text-gray-700 mb-3">${q.text} ${specificTag}</label>
+                    ${q.type === 'select' ? createSelect(q, gender) : createRange(q, gender)}
+                </div>`;
+        }
+
+
+        function createSelect(q, gender) {
+            const optionsHTML = q.options.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+            return `<select id="${q.id}-${gender}" name="${q.id}" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        ${optionsHTML}
+                    </select>`;
+        }
+
+        function createRange(q, gender) {
+            return `<div class="flex flex-col items-center">
+                        <input type="range" id="${q.id}-${gender}" name="${q.id}" min="${q.min}" max="${q.max}" value="${q.default}" class="w-full">
+                        <div class="w-full flex justify-between text-xs text-gray-500 px-1 mt-1">
+                            <span>${q.labels[0]}</span>
+                            <span id="${q.id}-${gender}-value" class="font-bold text-indigo-600 text-sm">${q.default}</span>
+                            <span>${q.labels[1]}</span>
+                        </div>
+                    </div>`;
+        }
+
+        // --- Matching Algorithm Logic ---
+        function calculateResults() {
+            const maleAnswers = getAnswers('male');
+            const femaleAnswers = getAnswers('female');
+            
+            const results = {};
+            let allScores = [];
+            const commonQuestions = questions.filter(q => q.gender === 'both');
+
+            for (const part in partInfo) {
+                const partQuestions = commonQuestions.filter(q => q.part === part);
+                if (partQuestions.length === 0) continue;
+
+                const partScores = partQuestions.map(q => {
+                    const maleAnswer = maleAnswers[q.id];
+                    const femaleAnswer = femaleAnswers[q.id];
+                    return calculateScore(q, maleAnswer, femaleAnswer);
+                });
+                
+                const averageScore = partScores.reduce((a, b) => a + b, 0) / partScores.length;
+                results[part] = {
+                    score: Math.round(averageScore),
+                    comment: getComment(part, Math.round(averageScore))
+                };
+                allScores.push(...partScores);
+            }
+            
+            const overallAverage = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+            results.overall = {
+                score: Math.round(overallAverage),
+                comment: getOverallComment(Math.round(overallAverage))
+            };
+
+            displayResults(results, maleAnswers, femaleAnswers);
+        }
+
+        function getAnswers(gender) {
+            const form = document.getElementById(`${gender}-form`);
+            const formData = new FormData(form);
+            const answers = {};
+            for (let [key, value] of formData.entries()) {
+                answers[key] = value;
+            }
+            return answers;
+        }
+
+        function calculateScore(question, answer1, answer2) {
+            if (question.type === 'select') {
+                return answer1 === answer2 ? 100 : 0;
+            } else if (question.type === 'range') {
+                const diff = Math.abs(parseInt(answer1) - parseInt(answer2));
+                const maxDiff = question.max - question.min;
+                return 100 * (1 - (diff / maxDiff));
+            }
+            return 0;
+        }
+
+        // --- Result Generation and Display ---
+        function getComment(part, score) {
+            if (score >= 80) return "아주 잘 맞아요! 두 분은 이 부분에서 서로를 깊이 이해하고 편안함을 느낄 가능성이 높습니다.";
+            if (score >= 60) return "잘 맞는 편이에요. 약간의 차이가 있지만, 서로에게 긍정적인 자극이 될 수 있는 지점입니다.";
+            if (score >= 40) return "서로 다른 점이 있네요. 이 차이가 갈등의 원인이 될 수도 있지만, 대화를 통해 충분히 맞춰갈 수 있습니다.";
+            return "상당한 차이가 발견되었어요. 이 부분에 대해서는 서로의 다름을 인정하고 존중하는 많은 노력이 필요해 보입니다.";
+        }
+        
+        function getOverallComment(score) {
+            if (score >= 85) return "환상의 커플! 서로에게 안정감을 주는, 편안한 소울메이트가 될 수 있어요!";
+            if (score >= 70) return "멋진 조합이에요! 서로의 다름을 보완해주며 함께 성장할 수 있는 관계입니다.";
+            if (score >= 50) return "알아가는 재미가 있겠어요! 공통점과 차이점을 발견하며 흥미로운 관계를 만들어갈 수 있습니다.";
+            return "도전적인 관계가 될 수 있어요! 많은 대화와 노력이 필요하지만, 그만큼 서로에게서 많은 것을 배울 수도 있습니다.";
+        }
+
+        function displayResults(results, maleAnswers, femaleAnswers) {
+            document.getElementById('overall-score').textContent = `${results.overall.score}점`;
+            document.getElementById('overall-comment').textContent = results.overall.comment;
+
+            const container = document.getElementById('detailed-results-container');
+            container.innerHTML = '';
+            for (const part in partInfo) {
+                if(results[part]){
+                    const info = partInfo[part];
+                    const result = results[part];
+                    container.innerHTML += createResultCard(info, result);
+                }
+            }
+            
+            for (const part in partInfo) {
+                if(results[part]){
+                    const info = partInfo[part];
+                    const result = results[part];
+                    const progressBar = document.querySelector(`#bar-${info.color}`);
+                    setTimeout(() => {
+                        if(progressBar) progressBar.style.width = `${result.score}%`;
+                    }, 100);
+                }
+            }
+            
+            document.getElementById('ice-breaking-questions').innerHTML = generateIceBreakers(maleAnswers, femaleAnswers);
+
+            document.getElementById('result-modal').classList.remove('hidden');
+            document.getElementById('result-modal').classList.add('flex');
+            setTimeout(() => {
+                document.getElementById('result-content').classList.remove('scale-95');
+                document.getElementById('result-content').classList.add('scale-100');
+            }, 50);
+        }
+        
+        function createResultCard(info, result) {
+            const colorClasses = {
+                green: { bg: 'bg-green-100', border: 'border-green-300', bar: 'bg-green-500', text: 'text-green-800' },
+                purple: { bg: 'bg-purple-100', border: 'border-purple-300', bar: 'bg-purple-500', text: 'text-purple-800' },
+                yellow: { bg: 'bg-yellow-100', border: 'border-yellow-300', bar: 'bg-yellow-500', text: 'text-yellow-800' },
+                red: { bg: 'bg-red-100', border: 'border-red-300', bar: 'bg-red-500', text: 'text-red-800' },
+            };
+            const c = colorClasses[info.color];
+
+            return `
+                <div class="${c.bg} ${c.border} border-l-4 p-4 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold ${c.text}">${info.icon} ${info.title}</h3>
+                        <span class="font-bold text-xl ${c.text}">${result.score}점</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="bar-${info.color}" class="result-bar ${c.bar} h-2.5 rounded-full" style="width: 0%;"></div>
+                    </div>
+                    <p class="mt-2 text-sm ${c.text}">${result.comment}</p>
+                </div>
+            `;
+        }
+        
+        // --- Icebreaker Generation Logic (v4: Gender-specific) ---
+        function generateIceBreakers(maleAnswers, femaleAnswers) {
+            let suggestions = [];
+
+            const getAnswerText = (qId, answerValue) => {
+                const question = questions.find(q => q.id === qId);
+                if (!question) return answerValue;
+                const option = question.options.find(o => o.value === answerValue);
+                return option ? `"${option.text}"` : answerValue;
+            };
+
+            // 1. 공통 질문 비교 (갈등 해결 방식)
+            const q5_male_text = getAnswerText('q5', maleAnswers.q5);
+            const q5_female_text = getAnswerText('q5', femaleAnswers.q5);
+            if (maleAnswers.q5 !== femaleAnswers.q5) {
+                suggestions.push({
+                    title: "🎭 성격: 우리만의 갈등 해결 규칙 만들기",
+                    text: `갈등이 생겼을 때, 남성분은 ${q5_male_text}, 여성분은 ${q5_female_text}(이)라고 답했어요. 서로의 방식이 어떻게 다른지, 그리고 각자에게 왜 그 방식이 편안한지 이야기해보세요. 그리고 '우리'만의 건강한 다툼의 규칙을 함께 만들어보면 어떨까요?`
+                });
+            }
+
+            // 2. 여성 특화 질문 -> 남성에게 대화 주제로 제시
+            const q_f1_answer = getAnswerText('q_f1', femaleAnswers.q_f1);
+            suggestions.push({
+                title: "👩‍🦰 여성분의 생각: 커리어와 가정",
+                text: `여성분은 '결혼/출산으로 인한 커리어 중단 가능성'에 대해 ${q_f1_answer} 이라고 답했어요. 이 답변에 대해 어떻게 생각하시나요? 여성분의 커리어 계획과 꿈을 지지하기 위해 어떤 역할을 해줄 수 있을지 함께 이야기 나눠보세요.`
+            });
+            
+            // 3. 남성 특화 질문 -> 여성에게 대화 주제로 제시
+            const q_m2_answer = getAnswerText('q_m2', maleAnswers.q_m2);
+            suggestions.push({
+                title: "👨‍🦱 남성분의 생각: 개인의 시간과 관계",
+                text: `남성분은 '취미 생활로 연인이 서운해할 때' ${q_m2_answer} 이라고 답했어요. 남성분에게 그 취미가 어떤 의미인지, 그리고 두 사람이 함께하는 시간과 각자의 시간을 어떻게 조율하면 좋을지 대화해보세요.`
+            });
+
+            // 4. 여성 특화 질문 -> 남성에게 대화 주제로 제시
+            const q_f3_answer = getAnswerText('q_f3', femaleAnswers.q_f3);
+            suggestions.push({
+                title: "❤️ 관계: 그녀가 '보호받는다'고 느끼는 순간",
+                text: `여성분은 연인에게 '보호받고 있다'고 느끼게 하는 가장 중요한 행동으로 ${q_f3_answer}을(를) 꼽았어요. 그녀가 언제 가장 안정감과 사랑을 느끼는지 기억하고 표현해주세요.`
+            });
+
+
+            return suggestions.map(s => `
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-gray-800 text-lg mb-2">${s.title}</h4>
+                    <p class="text-gray-600 text-base">${s.text}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('view-result-btn').addEventListener('click', calculateResults);
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            document.getElementById('result-content').classList.add('scale-95');
+            document.getElementById('result-content').classList.remove('scale-100');
+            setTimeout(() => {
+                document.getElementById('result-modal').classList.add('hidden');
+                document.getElementById('result-modal').classList.remove('flex');
+            }, 300);
+        });
+
+        // Initial Render
+        window.onload = renderQuestions;
+    </script>
+</body>
+</html>
+

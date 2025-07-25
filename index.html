@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -72,7 +71,7 @@
         <!-- Header -->
         <header class="text-center mb-8 md:mb-12">
             <h1 class="text-4xl md:text-5xl font-bold text-indigo-600">결하다</h1>
-            <p class="text-lg md:text-xl text-gray-600 mt-2">주관적 선호 설문 (v4: 성별 특화 질문)</p>
+            <p class="text-lg md:text-xl text-gray-600 mt-2">주관적 선호 설문 (v6.1: 텍스트 수정)</p>
         </header>
 
         <!-- Input Section -->
@@ -136,9 +135,10 @@
 
     <script>
         const questions = [
-            // Part 1: 가치관
+            // Part 1: 삶의 나침반 (가치관)
             { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q1", text: "1억 원의 보너스가 생겼습니다. 당신의 선택은?", type: "select", options: [{ value: "a", text: "즉시 평소 꿈꾸던 차를 계약한다 (현재의 만족)" }, { value: "b", text: "안정적인 우량주에 장기 투자한다 (미래의 안정)" }, { value: "c", text: "부모님께 절반을 드리고 나머지는 저축한다 (가족과 관계)" }, { value: "d", text: "MBA 진학 등 커리어 발전을 위해 사용한다 (성장과 성취)" }] },
             { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q13", text: "결혼 후 재산 관리 방식에 대한 당신의 생각은?", type: "select", options: [{ value: "a", text: "각자 수입은 각자 관리, 생활비만 공동 부담 (독립성)" }, { value: "b", text: "모든 수입을 합쳐 공동 통장으로 관리 (투명성과 공동체)" }, { value: "c", text: "수입이 더 높은 쪽이 주도적으로 관리 (효율성)" }] },
+            { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q_child_plan", text: "자녀 계획에 대한 당신의 생각은 어떤가요?", type: "select", options: [{ value: "a", text: "꼭 낳고 싶다 (자녀는 삶의 기쁨)" }, { value: "b", text: "상대방과 합의된다면 낳고 싶다 (관계 중심)" }, { value: "c", text: "딩크(DINK)를 선호한다 (개인의 삶 중시)" }, { value: "d", text: "아직 잘 모르겠다 (미정)"}] },
             { gender: 'male', part: "Part 1: 삶의 나침반 (가치관)", id: "q_m1", text: "연인이 당신의 소득이나 직업 안정성에 대해 불안감을 내비친다면, 당신의 반응은?", type: "select", options: [{ value: "a", text: "불안함을 공감하며, 함께 미래 계획을 세운다" }, { value: "b", text: "내 능력을 믿어주지 않는 것 같아 서운하다" }, { value: "c", text: "더 안정적인 직장을 알아봐야 하나 고민한다" }] },
             { gender: 'female', part: "Part 1: 삶의 나침반 (가치관)", id: "q_f1", text: "결혼이나 출산으로 인해 커리어가 중단될 수 있는 가능성에 대해 어떻게 생각하시나요?", type: "select", options: [{ value: "a", text: "커리어보다 가정이 중요하므로, 감수할 수 있다" }, { value: "b", text: "경력 단절은 안된다. 파트너와 함께 해결책을 찾을 것이다" }, { value: "c", text: "커리어를 위해 결혼/출산을 미루거나 포기할 수 있다" }] },
             { gender: 'both', part: "Part 1: 삶의 나침반 (가치관)", id: "q2", text: "당신이 생각하는 '가장 이상적인 노년의 모습'은?", type: "select", options: [{ value: "a", text: "사회적으로 존경받으며 전문성을 발휘하는 삶" }, { value: "b", text: "손주들에게 둘러싸여 화목한 가정을 꾸리는 삶" }, { value: "c", text: "배우자와 세계 일주를 하며 새로운 것을 배우는 삶" }, { value: "d", text: "조용한 시골에서 텃밭을 가꾸며 평온하게 사는 삶" }] },
@@ -149,8 +149,11 @@
             { gender: 'both', part: "Part 2: 타고난 다름 (성격/기질)", id: "q15", text: "연인이 주말에 '아무 계획 없이 그냥 떠나자!'라고 제안합니다. 당신의 속마음은?", type: "range", min: 1, max: 5, default: 3, labels: ["(불안) 숙소는? 예산은?", "(설렘) 너무 신나!"] },
             
             // Part 3: 라이프스타일
-            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q7", text: "아무 약속 없는 이상적인 토요일 하루는?", type: "select", options: [{ value: "a", text: "늦잠 후 배달 음식과 함께 넷플릭스 정주행 (완전한 휴식)" }, { value: "b", text: "아침 일찍 일어나 등산이나 서핑 즐기기 (아웃도어 액티비티)" }, { value: "c", text: "미술관이나 독립 서점에 들러 영감 채우기 (문화/예술)" }, { value: "d", text: "평소 가고 싶던 맛집, 핫플레이스 카페 투어 (트렌드/미식)" }] },
-            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q17", text: "일주일간의 휴가, 당신이 선택할 여행지는?", type: "select", options: [{ value: "a", text: "몰디브의 고급 리조트에서 즐기는 프라이빗 휴양 (럭셔리/힐링)" }, { value: "b", text: "페루 마추픽추 트레킹과 현지 문화 체험 (모험/도전)" }, { value: "c", text: "파리 루브르 박물관과 미슐랭 레스토랑 투어 (도시/문화)" }, { value: "d", text: "제주도에서 차를 렌트해 발길 닿는 대로 여행 (자유/즉흥)" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q7", text: "꿈에 그리던 완벽한 토요일, 당신의 하루는 어떤 모습에 가장 가까운가요?", type: "select", options: [{ value: "a", text: "하루 종일 침대와 한 몸! 넷플릭스와 배달 음식과 함께하는 완전한 방콕 (완전한 휴식)" }, { value: "b", text: "아침 일찍 등산 후, 맛있는 막걸리와 파전으로 마무리 (아웃도어/활동)" }, { value: "c", text: "미술관에서 영감을 얻고, 저녁엔 분위기 좋은 재즈바에서 칵테일 한 잔 (문화/예술)" }, { value: "d", text: "친구들과 만나 브런치를 즐기고, 저녁엔 새로운 사람들과 어울리는 파티 참석 (사교/네트워킹)" }, { value: "e", text: "대청소로 집을 반짝이게 만들고, 정성껏 요리해서 소중한 사람과 저녁 식사 (자기관리/안정)" }, { value: "f", text: "땀 흘리는 운동(헬스, 필라테스) 후 마시는 시원한 단백질 쉐이크 (스포츠/건강)" }, { value: "g", text: "친구들과 모여 보드게임을 하며 밤새 웃고 떠들기 (실내/사교)" }, { value: "h", text: "평소 배우고 싶었던 베이킹 등 원데이 클래스 참여하기 (자기계발/취미)" }, { value: "i", text: "반려동물과 함께 애견 카페나 넓은 공원에서 시간 보내기 (반려동물/교감)" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_food_style", text: "평소 당신의 음식 취향은 어떤가요?", type: "select", options: [{ value: "a", text: "김치찌개, 된장찌개 최고! 익숙한 한식을 가장 선호 (한식파)" }, { value: "b", text: "파스타, 스테이크, 피자 등 새로운 양식을 즐김 (양식파)" }, { value: "c", text: "마라탕, 쌀국수 등 이국적인 음식에 도전하는 것을 즐김 (모험파)" }, { value: "d", text: "가리는 것 없이 다 잘 먹음 (대식가)" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_hobby_food", text: "집에서 영화를 보거나 취미 생활을 할 때, 당신의 최애 간식 조합은?", type: "select", options: [{ value: "a", text: "짭짤한 팝콘과 시원한 콜라 (클래식 조합)" }, { value: "b", text: "달콤한 케이크와 향긋한 커피/차 (디저트 타임)" }, { value: "c", text: "매콤한 떡볶이와 바삭한 튀김 (K-분식 조합)" }, { value: "d", text: "가벼운 과일과 치즈 플래터, 와인 한 잔 (분위기 조합)" }, { value: "e", text: "따로 챙겨 먹지 않고, 활동에만 집중한다 (집중형)" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_dessert_habit", text: "식사 후에 디저트를 즐겨 드시나요?", type: "select", options: [{ value: "a", text: "네, 디저트 배는 따로 있어요! (필수)" }, { value: "b", text: "가끔 즐기는 편이에요 (선택)" }, { value: "c", text: "아니요, 거의 먹지 않아요 (생략)" }] },
+            { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_dessert_preference", text: "가장 좋아하는 디저트 스타일은 무엇인가요? (디저트를 안 드시면 '해당 없음' 선택)", type: "select", options: [{ value: "a", text: "케이크, 마카롱 등 달콤한 서양식 디저트" }, { value: "b", text: "빙수, 아이스크림 등 시원한 디저트" }, { value: "c", text: "약과, 떡, 팥빙수 등 K-디저트" }, { value: "d", text: "디저트는 별로... (해당 없음)" }] },
             { gender: 'male', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_m2", text: "개인적인 취미(게임, 낚시, 동호회 등)에 주말 시간을 온전히 사용하는 것에 대해 연인이 서운해한다면?", type: "select", options: [{ value: "a", text: "연인과의 시간이 더 중요하므로, 취미를 줄인다" }, { value: "b", text: "서운함을 풀어주고, 취미의 중요성을 설명하며 타협점을 찾는다" }, { value: "c", text: "개인의 시간은 존중받아야 한다고 주장한다" }] },
             { gender: 'female', part: "Part 3: 일상의 합 (라이프스타일)", id: "q_f2", text: "맞벌이를 할 경우, 가사 분담의 가장 이상적인 모습은?", type: "select", options: [{ value: "a", text: "시간 여유가 있는 사람이 더 많이 한다" }, { value: "b", text: "각자 잘하는 일을 분담해서 처리한다" }, { value: "c", text: "5:5로 공평하게, 또는 규칙을 정해서 분담한다" }] },
             { gender: 'both', part: "Part 3: 일상의 합 (라이프스타일)", id: "q8", text: "피곤하게 퇴근했는데, 설거짓거리가 쌓여있습니다. 당신은?", type: "range", min: 1, max: 5, default: 3, labels: ["내일로 미룬다", "피곤해도 바로 치운다"] },
@@ -285,6 +288,11 @@
         }
 
         function calculateScore(question, answer1, answer2) {
+            if (question.id === 'q_child_plan') {
+                const scoreMap = { 'a': 1, 'b': 2, 'c': 4, 'd': 3 }; // b와 d는 유사, c는 가장 다름
+                const diff = Math.abs(scoreMap[answer1] - scoreMap[answer2]);
+                return Math.max(0, 100 - diff * 33);
+            }
             if (question.type === 'select') {
                 return answer1 === answer2 ? 100 : 0;
             } else if (question.type === 'range') {
@@ -368,7 +376,7 @@
             `;
         }
         
-        // --- Icebreaker Generation Logic (v4: Gender-specific) ---
+        // --- Icebreaker Generation Logic (v6: Detailed) ---
         function generateIceBreakers(maleAnswers, femaleAnswers) {
             let suggestions = [];
 
@@ -379,35 +387,48 @@
                 return option ? `"${option.text}"` : answerValue;
             };
 
-            // 1. 공통 질문 비교 (갈등 해결 방식)
-            const q5_male_text = getAnswerText('q5', maleAnswers.q5);
-            const q5_female_text = getAnswerText('q5', femaleAnswers.q5);
-            if (maleAnswers.q5 !== femaleAnswers.q5) {
-                suggestions.push({
-                    title: "🎭 성격: 우리만의 갈등 해결 규칙 만들기",
-                    text: `갈등이 생겼을 때, 남성분은 ${q5_male_text}, 여성분은 ${q5_female_text}(이)라고 답했어요. 서로의 방식이 어떻게 다른지, 그리고 각자에게 왜 그 방식이 편안한지 이야기해보세요. 그리고 '우리'만의 건강한 다툼의 규칙을 함께 만들어보면 어떨까요?`
+            // 1. 자녀 계획에 대한 대화
+            const q_child_male_text = getAnswerText('q_child_plan', maleAnswers.q_child_plan);
+            const q_child_female_text = getAnswerText('q_child_plan', femaleAnswers.q_child_plan);
+            if (maleAnswers.q_child_plan !== femaleAnswers.q_child_plan) {
+                 suggestions.push({
+                    title: "🧭 가치관: 미래의 가족을 그리다",
+                    text: `자녀 계획에 대해 남성분은 ${q_child_male_text}, 여성분은 ${q_child_female_text}(이)라고 답했어요. 이 주제는 관계에서 매우 중요하므로, 두 분이 생각하는 이상적인 가족의 모습과 미래에 대해 솔직한 대화를 나눠보는 것이 중요해요.`
                 });
             }
 
-            // 2. 여성 특화 질문 -> 남성에게 대화 주제로 제시
-            const q_f1_answer = getAnswerText('q_f1', femaleAnswers.q_f1);
+            // 2. 디저트 취향에 대한 대화
+            const q_dessert_male_habit = maleAnswers.q_dessert_habit;
+            const q_dessert_female_habit = femaleAnswers.q_dessert_habit;
+            const q_dessert_male_pref = getAnswerText('q_dessert_preference', maleAnswers.q_dessert_preference);
+            const q_dessert_female_pref = getAnswerText('q_dessert_preference', femaleAnswers.q_dessert_preference);
+
+            if (q_dessert_male_habit !== 'c' && q_dessert_female_habit !== 'c') { // 둘 다 디저트를 먹는다면
+                if (maleAnswers.q_dessert_preference === femaleAnswers.q_dessert_preference && maleAnswers.q_dessert_preference !== 'd') {
+                    suggestions.push({
+                        title: "🍰 달콤한 우리 사이: 디저트 취향",
+                        text: `두 분 다 ${q_dessert_male_pref} 디저트를 좋아하시는군요! 식사 후 함께 달콤한 시간을 보내는 건 어떨까요? 서로의 인생 디저트 카페를 추천해주세요!`
+                    });
+                } else if (maleAnswers.q_dessert_preference !== femaleAnswers.q_dessert_preference && maleAnswers.q_dessert_preference !== 'd' && femaleAnswers.q_dessert_preference !== 'd') {
+                    suggestions.push({
+                        title: "🍰 달콤한 우리 사이: 서로의 최애 디저트",
+                        text: `디저트 취향이 다르시네요! 남성분은 ${q_dessert_male_pref}, 여성분은 ${q_dessert_female_pref} 스타일을 좋아해요. 각자 자신의 '최애' 디저트 가게에 상대를 데려가 새로운 맛을 경험시켜주는 데이트는 어떨까요?`
+                    });
+                }
+            }
+            
+            // 3. 여성 특화 질문 -> 남성에게 대화 주제로 제시
+            const q_f2_answer = getAnswerText('q_f2', femaleAnswers.q_f2);
             suggestions.push({
-                title: "👩‍🦰 여성분의 생각: 커리어와 가정",
-                text: `여성분은 '결혼/출산으로 인한 커리어 중단 가능성'에 대해 ${q_f1_answer} 이라고 답했어요. 이 답변에 대해 어떻게 생각하시나요? 여성분의 커리어 계획과 꿈을 지지하기 위해 어떤 역할을 해줄 수 있을지 함께 이야기 나눠보세요.`
+                title: "👩‍🦰 여성분의 생각: 함께 꾸리는 우리 집",
+                text: `여성분은 '맞벌이 시 이상적인 가사 분담'에 대해 ${q_f2_answer} 이라고 답했어요. 이 답변에 대해 어떻게 생각하시나요? 두 분이 함께 만들어갈 행복한 가정을 위해, 집안일에 대한 서로의 생각과 규칙을 미리 이야기해보는 것이 좋아요.`
             });
             
-            // 3. 남성 특화 질문 -> 여성에게 대화 주제로 제시
-            const q_m2_answer = getAnswerText('q_m2', maleAnswers.q_m2);
+            // 4. 남성 특화 질문 -> 여성에게 대화 주제로 제시
+            const q_m3_answer = getAnswerText('q_m3', maleAnswers.q_m3);
             suggestions.push({
-                title: "👨‍🦱 남성분의 생각: 개인의 시간과 관계",
-                text: `남성분은 '취미 생활로 연인이 서운해할 때' ${q_m2_answer} 이라고 답했어요. 남성분에게 그 취미가 어떤 의미인지, 그리고 두 사람이 함께하는 시간과 각자의 시간을 어떻게 조율하면 좋을지 대화해보세요.`
-            });
-
-            // 4. 여성 특화 질문 -> 남성에게 대화 주제로 제시
-            const q_f3_answer = getAnswerText('q_f3', femaleAnswers.q_f3);
-            suggestions.push({
-                title: "❤️ 관계: 그녀가 '보호받는다'고 느끼는 순간",
-                text: `여성분은 연인에게 '보호받고 있다'고 느끼게 하는 가장 중요한 행동으로 ${q_f3_answer}을(를) 꼽았어요. 그녀가 언제 가장 안정감과 사랑을 느끼는지 기억하고 표현해주세요.`
+                title: "👨‍🦱 남성분의 생각: 그의 속마음",
+                text: `남성분은 '힘든 일이 있을 때 연인에게 털어놓는 정도'에 대해 ${q_m3_answer} 이라고 답했어요. 그가 언제 위로가 필요하고, 또 언제 혼자만의 시간이 필요한지 이해해준다면 더욱 깊은 관계가 될 수 있을 거예요.`
             });
 
 
@@ -435,4 +456,3 @@
     </script>
 </body>
 </html>
-
